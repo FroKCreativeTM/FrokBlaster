@@ -28,6 +28,7 @@ public:
 
 public : 
 	// Getter/Setter
+	FORCEINLINE void SetWeaponState(EWeaponState State) { WeaponState = State; }
 
 protected:
 	virtual void BeginPlay() override;
