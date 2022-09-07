@@ -1,5 +1,7 @@
 #include "Weapon.h"
 #include "Components/SphereComponent.h"
+#include "Components/WidgetComponent.h"
+#include "FrokBlaster/Character/BlasterCharacter.h"
 
 AWeapon::AWeapon()
 {
@@ -7,7 +9,6 @@ AWeapon::AWeapon()
 	bReplicates = true;		// 이 액터는 리플리케이트됩니다.
 
 	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh"));
-	WeaponMesh->SetupAttachment(RootComponent);
 	SetRootComponent(WeaponMesh);
 
 	// ECR_Block : 사물이 지나가지 못하도록 방지
@@ -23,7 +24,8 @@ AWeapon::AWeapon()
 	AreaSphere->SetCollisionResponseToChannels(ECollisionResponse::ECR_Ignore);
 	AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-
+	PickupWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("PickupWidget"));
+	PickupWidget->SetupAttachment(RootComponent);
 }
 
 void AWeapon::BeginPlay()
@@ -31,16 +33,35 @@ void AWeapon::BeginPlay()
 	Super::BeginPlay();
 	
 	// 서버의 경우 (리슨 서버인 경우 방판 사람인 경우다.)
-	if (HasAuthority())
+	/*if (HasAuthority())
 	{
 		AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		AreaSphere->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
+		AreaSphere->OnComponentBeginOverlap.AddDynamic(this, &AWeapon::OnSphereOverlap);
+	}*/
+	if (PickupWidget)
+	{
+		PickupWidget->SetVisibility(false);
 	}
 }
 
+void AWeapon::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, 
+	AActor* OtherActor, UPrimitiveComponent* OtherComp, 
+	int32 OtherBodyIndex, bool bFromSweep, 
+	const FHitResult& SweepResult)
+{
+	// 블라스터 캐릭터만 UI가 보이게 설정한다.
+	ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(OtherActor);
+	if (BlasterCharacter && PickupWidget != nullptr)
+	{
+		PickupWidget->SetVisibility(true);
+	}
+}
+
+
+// 지금 안 쓰니 내림
 void AWeapon::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
 }
-

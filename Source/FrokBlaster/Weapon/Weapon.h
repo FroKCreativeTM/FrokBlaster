@@ -25,6 +25,15 @@ public:
 	AWeapon();
 	virtual void Tick(float DeltaTime) override;
 
+	// 面倒 备客 般模 版快
+	virtual void OnSphereOverlap(
+		UPrimitiveComponent* OverlappedComponent,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex,
+		bool bFromSweep,
+		const FHitResult& SweepResult);
+
 public : 
 	// Getter/Setter
 
@@ -38,6 +47,9 @@ private :
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
 	class USphereComponent* AreaSphere;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
 	EWeaponState WeaponState;
+
+	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
+	class UWidgetComponent* PickupWidget;
 };
