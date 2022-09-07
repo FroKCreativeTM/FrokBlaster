@@ -63,6 +63,31 @@ void ABlasterCharacter::PostInitializeComponents()
 	}
 }
 
+void ABlasterCharacter::EquipButtonPressed()
+{
+	// 장착은 서버에서 타당성(Validation)을 파악한 뒤 처리해야 한다.
+	// 문제는 이러면 클라이언트는 잡질 못함(바꿀 필요 있음)
+	if (Combat)
+	{
+		// 서버라면 바로 실행이 가능하다.
+		if (HasAuthority())
+			Combat->EquipWeapon(OverlappingWeapon);
+		// 클라이언트라면 서버에게 대리로 맡겨서 결과를 받아야한다.
+		else
+			ServerEquipButtonPressed();
+	}
+}
+
+// RPC 함수는 뒤에 _Implementation이 붙어야한다.
+void ABlasterCharacter::ServerEquipButtonPressed_Implementation()
+{
+	// 서버에서 실행한다면 당연히 HasAuthority()를 true 반환할 것이다.
+	if (Combat)
+	{
+		Combat->EquipWeapon(OverlappingWeapon);
+	}
+}
+
 void ABlasterCharacter::SetOverlappingWeapon(AWeapon* Weapon)
 {
 	if (OverlappingWeapon)
@@ -135,14 +160,4 @@ void ABlasterCharacter::Turn(float Value)
 void ABlasterCharacter::LookUp(float Value)
 {
 	AddControllerPitchInput(Value);
-}
-
-void ABlasterCharacter::EquipButtonPressed()
-{
-	// 장착은 서버에서 타당성(Validation)을 파악한 뒤 처리해야 한다.
-	// 문제는 이러면 클라이언트는 잡질 못함(바꿀 필요 있음)
-	if (Combat && HasAuthority())
-	{
-		Combat->EquipWeapon(OverlappingWeapon);
-	}
 }

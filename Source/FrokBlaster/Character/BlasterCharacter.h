@@ -50,6 +50,11 @@ private :
 	UPROPERTY(VisibleAnywhere)
 	class UCombatComponent* Combat;
 
+	// 메서드 이름 앞에 Server가 붙고
+	// UFUNCTION(Server) 매크로를 사용한다면 RPC 메서드이다.
+	UFUNCTION(Server, Reliable)
+	void ServerEquipButtonPressed();
+
 public:
 	// Getter/Setter
 	void SetOverlappingWeapon(AWeapon* Weapon);
