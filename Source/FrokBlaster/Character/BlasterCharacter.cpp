@@ -3,6 +3,8 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Net/UnrealNetwork.h"
+#include "FrokBlaster/Weapon/Weapon.h"
 
 ABlasterCharacter::ABlasterCharacter()
 {
@@ -29,7 +31,53 @@ ABlasterCharacter::ABlasterCharacter()
 
 void ABlasterCharacter::BeginPlay()
 {
-	Super::BeginPlay();	
+	Super::BeginPlay();
+}
+
+void ABlasterCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+}
+
+void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	// 여기에 복제될 변수를 등록하는 매크로를 적는다. (DOREPLIFETIME, 조건이 있다면 DOREPLIFETIME_CONDITION)
+	// COND_OwnerOnly : 만약 클라이언트 중 하나(autonomous proxy)와 Overlap된 경우
+	// overlapping된 무기는 단지 그 캐릭터를 소유한 클라이언트한테만 복제가 된다.
+	DOREPLIFETIME_CONDITION(ABlasterCharacter, OverlappingWeapon, COND_OwnerOnly);
+}
+
+void ABlasterCharacter::SetOverlappingWeapon(AWeapon* Weapon)
+{
+	if (OverlappingWeapon)
+	{
+		OverlappingWeapon->ShowPickupWidget(false);
+	}
+
+	OverlappingWeapon = Weapon;
+
+	// 이것이 없다면 서버 역할을 맡는 입장에서는 위젯이 작동하지 않는다.
+	if (IsLocallyControlled())
+	{
+		if (OverlappingWeapon)
+		{
+			OverlappingWeapon->ShowPickupWidget(true);
+		}
+	}
+}
+
+void ABlasterCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
+{
+	if (OverlappingWeapon)
+	{
+		OverlappingWeapon->ShowPickupWidget(true);
+	}
+	if (LastWeapon)
+	{
+		LastWeapon->ShowPickupWidget(false);
+	}
 }
 
 void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -72,12 +120,6 @@ void ABlasterCharacter::Turn(float Value)
 void ABlasterCharacter::LookUp(float Value)
 {
 	AddControllerPitchInput(Value);
-}
-
-void ABlasterCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
 }
 
 

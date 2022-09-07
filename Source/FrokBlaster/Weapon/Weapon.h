@@ -24,8 +24,16 @@ class FROKBLASTER_API AWeapon : public AActor
 public:	
 	AWeapon();
 	virtual void Tick(float DeltaTime) override;
+	void ShowPickupWidget(bool bShowWidget);
+
+public : 
+	// Getter/Setter
+
+protected:
+	virtual void BeginPlay() override;
 
 	// 面倒 备客 般模 版快
+	UFUNCTION()
 	virtual void OnSphereOverlap(
 		UPrimitiveComponent* OverlappedComponent,
 		AActor* OtherActor,
@@ -34,11 +42,13 @@ public:
 		bool bFromSweep,
 		const FHitResult& SweepResult);
 
-public : 
-	// Getter/Setter
-
-protected:
-	virtual void BeginPlay() override;
+	UFUNCTION()
+	void OnSphereEndOverlap(
+		UPrimitiveComponent* OverlappedComponent,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex
+	);
 
 private :	
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")

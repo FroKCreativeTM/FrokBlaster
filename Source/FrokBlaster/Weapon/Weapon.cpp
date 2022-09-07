@@ -21,11 +21,16 @@ AWeapon::AWeapon()
 	AreaSphere->SetupAttachment(RootComponent);
 
 	// ECR_Ignore : 무시하고 진행, ex) 안개나 구름처럼 통과
-	AreaSphere->SetCollisionResponseToChannels(ECollisionResponse::ECR_Ignore);
+	AreaSphere->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	PickupWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("PickupWidget"));
 	PickupWidget->SetupAttachment(RootComponent);
+}
+
+void AWeapon::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
 }
 
 void AWeapon::BeginPlay()
@@ -33,12 +38,13 @@ void AWeapon::BeginPlay()
 	Super::BeginPlay();
 	
 	// 서버의 경우 (리슨 서버인 경우 방판 사람인 경우다.)
-	/*if (HasAuthority())
+	if (HasAuthority())
 	{
 		AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		AreaSphere->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
 		AreaSphere->OnComponentBeginOverlap.AddDynamic(this, &AWeapon::OnSphereOverlap);
-	}*/
+		AreaSphere->OnComponentEndOverlap.AddDynamic(this, &AWeapon::OnSphereEndOverlap);
+	}
 	if (PickupWidget)
 	{
 		PickupWidget->SetVisibility(false);
@@ -52,16 +58,26 @@ void AWeapon::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent,
 {
 	// 블라스터 캐릭터만 UI가 보이게 설정한다.
 	ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(OtherActor);
-	if (BlasterCharacter && PickupWidget != nullptr)
+	if (BlasterCharacter)
 	{
-		PickupWidget->SetVisibility(true);
+		BlasterCharacter->SetOverlappingWeapon(this);
 	}
 }
 
-
-// 지금 안 쓰니 내림
-void AWeapon::Tick(float DeltaTime)
+void AWeapon::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent,
+	AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	Super::Tick(DeltaTime);
+	ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(OtherActor);
+	if (BlasterCharacter)
+	{
+		BlasterCharacter->SetOverlappingWeapon(nullptr);
+	}
+}
 
+void AWeapon::ShowPickupWidget(bool bShowWidget)
+{
+	if (PickupWidget)
+	{
+		PickupWidget->SetVisibility(bShowWidget);
+	}
 }
