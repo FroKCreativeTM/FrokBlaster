@@ -29,10 +29,16 @@ private :
 	UPROPERTY(Replicated)
 	AWeapon* EquippedWeapon;		// 장착중인 무기
 
+	UPROPERTY(Replicated)
+	bool bAiming;
+
 public : 
 	// ABlasterCharacter 입장에서는 이 컴포넌트의 모든 것에 접근할 수 있어야 한다.
 	friend class ABlasterCharacter;
 
 	// Getter / Setter
+	void SetAiming(bool bIsAiming);
 
+	UFUNCTION(Server, Reliable)
+	void ServerSetAiming(bool bIsAiming);
 };
