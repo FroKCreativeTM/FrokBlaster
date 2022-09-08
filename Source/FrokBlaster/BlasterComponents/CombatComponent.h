@@ -26,7 +26,7 @@ protected:
 private :
 	class ABlasterCharacter* Character;	// 장착중인 캐릭터
 
-	UPROPERTY(Replicated)
+	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
 	AWeapon* EquippedWeapon;		// 장착중인 무기
 
 	UPROPERTY(Replicated)
@@ -41,4 +41,7 @@ public :
 
 	UFUNCTION(Server, Reliable)
 	void ServerSetAiming(bool bIsAiming);
+
+	UFUNCTION()
+	void OnRep_EquippedWeapon();
 };
