@@ -6,6 +6,7 @@
 #include "Net/UnrealNetwork.h"
 #include "FrokBlaster/Weapon/Weapon.h"
 #include "FrokBlaster/BlasterComponents/CombatComponent.h"
+#include "Components/CapsuleComponent.h"
 
 ABlasterCharacter::ABlasterCharacter()
 {
@@ -33,6 +34,10 @@ ABlasterCharacter::ABlasterCharacter()
 	Combat->SetIsReplicated(true);	// DOREPLIFETIME 없이 복제가 가능하다.
 
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
+
+	// 메시, 캡슐이 카메라와 부딛히는 경우 무시하게 만들어준다.
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 }
 
 void ABlasterCharacter::BeginPlay()

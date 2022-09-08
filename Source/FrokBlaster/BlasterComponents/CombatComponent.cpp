@@ -9,6 +9,11 @@
 UCombatComponent::UCombatComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+
+	// 일반적인 경우와
+	// 조준 시 스피드의 차이를 둔다.
+	BaseWalkSpeed = 600.f;
+	AimWalkSpeed = 450.f;
 }
 
 
@@ -16,6 +21,10 @@ void UCombatComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (Character)
+	{
+		Character->GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
+	}
 }
 
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -53,11 +62,24 @@ void UCombatComponent::SetAiming(bool bIsAiming)
 {
 	bAiming = bIsAiming;
 	ServerSetAiming(bIsAiming);
+
+	// 조준 시와 일반적인 경우의 스피드를 다르게 설정한다.
+	if (Character)
+	{
+		Character->GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : BaseWalkSpeed;
+	}
 }
 
+// 서버에서 처리하기 위한 함수
 void UCombatComponent::ServerSetAiming_Implementation(bool bIsAiming)
 {
 	bAiming = bIsAiming;
+
+	// 조준 시와 일반적인 경우의 스피드를 다르게 설정한다.
+	if (Character)
+	{
+		Character->GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : BaseWalkSpeed;
+	}
 }
 
 void UCombatComponent::OnRep_EquippedWeapon()
