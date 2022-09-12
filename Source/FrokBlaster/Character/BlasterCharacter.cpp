@@ -39,6 +39,13 @@ ABlasterCharacter::ABlasterCharacter()
 	// 메시, 캡슐이 카메라와 부딛히는 경우 무시하게 만들어준다.
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+
+	// 제자리에서 돌고 있지 않다.
+	TurningInPlace = ETurningInPlace::ETIP_NotTurning;
+
+	// 여기서도 서버에서 돌아가는 업데이트 프리퀀시를 적용할 수 있다.
+	NetUpdateFrequency = 66.f;
+	MinNetUpdateFrequency = 33.f;
 }
 
 void ABlasterCharacter::BeginPlay()
@@ -70,6 +77,37 @@ void ABlasterCharacter::PostInitializeComponents()
 	if (Combat)
 	{
 		Combat->Character = this;
+	}
+}
+
+void ABlasterCharacter::TurnInPlace(float DeltaTime)
+{
+	// 회전하고 있는 Yaw 방향이 어딘가에 따라서 도는 방향을 저장한다.
+	if (AO_Yaw > 90.f)
+	{
+		TurningInPlace = ETurningInPlace::ETIP_Right;
+	}
+	else if (AO_Yaw < -90.f)
+	{
+		TurningInPlace = ETurningInPlace::ETIP_Left;
+	}
+	// 만약 돌고 있는 상황이면
+	if (TurningInPlace != ETurningInPlace::ETIP_NotTurning)
+	{
+		// 스피드(4.f)에 따른 Aim Offset yaw값을 보간한다.
+		// Interpolate float from Current to Target. Scaled by distance to Target, 
+		// so it has a strong start speed and ease out.
+		InterpAO_Yaw = FMath::FInterpTo(InterpAO_Yaw, 0.f, DeltaTime, 4.f);
+		// 보간된 값을 적용한다.
+		AO_Yaw = InterpAO_Yaw;
+		// 절대값이 15도보다 작은 경우
+		if (FMath::Abs(AO_Yaw) < 15.f)
+		{
+			// 돌지 않고 있다고 판단한다
+			TurningInPlace = ETurningInPlace::ETIP_NotTurning;
+			// 원래 Yaw값을 시작값으로 설정한다.
+			StartingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
+		}
 	}
 }
 
@@ -217,24 +255,41 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 	// 무기가 없다면 딱히 적용할 필요가 없다.
 	if (Combat && Combat->EquippedWeapon == nullptr) return;
 
+	// 현재 velocity를 가져온다.
 	FVector Velocity = GetVelocity();
-	Velocity.Z = 0.f;
-	float Speed = Velocity.Size();
-	bool bIsInAir = GetCharacterMovement()->IsFalling();
+	Velocity.Z = 0.f;	
+	float Speed = Velocity.Size();	// 현재 x,y축을 중심으로 한 스피드값을 구한다.
+	bool bIsInAir = GetCharacterMovement()->IsFalling();	// 현재 떨어지고 있는가를 구한다.
 
-	if (Speed == 0.f && !bIsInAir) // standing still, not jumping
+	if (Speed == 0.f && !bIsInAir) // 점프하지 않은 단순히 서있는 상태라면
 	{
+		// 현재 Aim Rotation을 Yaw값을 이용해서 구한다.
 		FRotator CurrentAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
+		// 이후 현재 Aim과 시작 Aim의 차이값을 정규화 한다.
 		FRotator DeltaAimRotation 
 			= UKismetMathLibrary::NormalizedDeltaRotator(CurrentAimRotation, StartingAimRotation);
-		AO_Yaw = DeltaAimRotation.Yaw;
-		bUseControllerRotationYaw = false;
-	}
-	if (Speed > 0.f || bIsInAir) // running, or jumping
-	{
-		StartingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
-		AO_Yaw = 0.f;
+		// 정규화된 Aim Yaw 차이값을 저장한다.
+		AO_Yaw = DeltaAimRotation.Yaw;		
+		
+		// 만약 돌고 있지 않는 경우
+		if (TurningInPlace == ETurningInPlace::ETIP_NotTurning)
+		{
+			InterpAO_Yaw = AO_Yaw;
+		}
 		bUseControllerRotationYaw = true;
+		// 현재 도는 방향을 저장한다. (Aim offset 가지는 상황이라 저장이 가능하다.)
+		TurnInPlace(DeltaTime);
+	}
+	if (Speed > 0.f || bIsInAir) // 움직이는 상태(걷기, 뛰기, 점프)
+	{
+		// 시작 Aim의 회전값을 현재 폰의 Yaw값으로 둔다. 
+		StartingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
+		// Aimoff셋을 0으로 둔다.(짜피 오프셋이 필요한 애니메이션을 실행하지 않으니까!)
+		AO_Yaw = 0.f;
+		// Yaw회전을 할 수 있게 설정한다.
+		bUseControllerRotationYaw = true;
+		// 현재 회전중이라 제자리 회전이 아니다.
+		TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 	}
 
 	AO_Pitch = GetBaseAimRotation().Pitch;
@@ -245,4 +300,13 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 		FVector2D OutRange(-90.f, 0.f);
 		AO_Pitch = FMath::GetMappedRangeValueClamped(InRange, OutRange, AO_Pitch);
 	}
+}
+
+AWeapon* ABlasterCharacter::GetEquippedWeapon()
+{
+	// 만약 전투 시스템이 없다면 반환
+	if (Combat == nullptr) return nullptr;
+
+	// 현재 캐릭터가 가지고 있는 전투 시스템에 등록된 무기를 반환한다.
+	return Combat->EquippedWeapon;
 }

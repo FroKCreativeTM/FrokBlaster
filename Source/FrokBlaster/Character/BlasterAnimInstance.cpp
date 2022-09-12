@@ -5,6 +5,7 @@
 #include "BlasterCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "FrokBlaster/Weapon/Weapon.h"
 
 void UBlasterAnimInstance::NativeInitializeAnimation()
 {
@@ -32,6 +33,7 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float fDeltaTime)
 	bWeaponEquipped = BlasterCharacter->IsWeaponEquipped();
 	bIsCrouched = BlasterCharacter->bIsCrouched;	
 	bAiming = BlasterCharacter->IsAiming();
+	TurningInPlace = BlasterCharacter->GetTurningInPlace();
 
 	/* 복습할 코드 */
 	// 스트레이핑을 위한 yaw 오프셋 
@@ -51,4 +53,30 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float fDeltaTime)
 	AO_Yaw = BlasterCharacter->GetAO_Yaw();
 	AO_Pitch = BlasterCharacter->GetAO_Pitch();
 	/* 복습할 코드 끝 */
+
+	// 만약 무기를 장착하고 있고
+	// 그 무기의 실체가 있으며
+	// 그 무기의 mesh도 있고
+	// 이 애니메이션 인스턴스를 가진 캐릭터의 메시도 존재한다면
+	if (bWeaponEquipped 
+		&& EquippedWeapon 
+		&& EquippedWeapon->GetWeaponMesh() 
+		&& BlasterCharacter->GetMesh())
+	{
+		// 왼손 소켓의 트랜스폼 정보를 가져온다.
+		LeftHandTransform 
+			= EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("LeftHandSocket"),
+				ERelativeTransformSpace::RTS_World);
+
+		FVector OutPosition;
+		FRotator OutRotation;
+
+		// hand_r 소캣의 본의 위치와 회전값을 가져온다.
+		BlasterCharacter->GetMesh()->TransformToBoneSpace(FName("hand_r"), 
+			LeftHandTransform.GetLocation(), FRotator::ZeroRotator, OutPosition, OutRotation);
+
+		// 가져온 본 값을 왼손에 적용한다.
+		LeftHandTransform.SetLocation(OutPosition);
+		LeftHandTransform.SetRotation(FQuat(OutRotation));
+	}
 }
