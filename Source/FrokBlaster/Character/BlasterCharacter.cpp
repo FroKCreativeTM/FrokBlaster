@@ -214,7 +214,9 @@ void ABlasterCharacter::AimButtonReleased()
 
 void ABlasterCharacter::AimOffset(float DeltaTime)
 {
+	// 무기가 없다면 딱히 적용할 필요가 없다.
 	if (Combat && Combat->EquippedWeapon == nullptr) return;
+
 	FVector Velocity = GetVelocity();
 	Velocity.Z = 0.f;
 	float Speed = Velocity.Size();
@@ -223,7 +225,8 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 	if (Speed == 0.f && !bIsInAir) // standing still, not jumping
 	{
 		FRotator CurrentAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
-		FRotator DeltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentAimRotation, StartingAimRotation);
+		FRotator DeltaAimRotation 
+			= UKismetMathLibrary::NormalizedDeltaRotator(CurrentAimRotation, StartingAimRotation);
 		AO_Yaw = DeltaAimRotation.Yaw;
 		bUseControllerRotationYaw = false;
 	}
