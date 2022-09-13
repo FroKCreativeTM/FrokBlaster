@@ -6,6 +6,9 @@ void AProjectileWeapon::Fire(const FVector& HitTarget)
 {
 	Super::Fire(HitTarget);
 
+	// 서버가 아니라면
+	if (!HasAuthority()) return;
+
 	APawn* InstigatorPawn = Cast<APawn>(GetOwner());
 
 	// 총구 부분의 Socket을 가져온다.

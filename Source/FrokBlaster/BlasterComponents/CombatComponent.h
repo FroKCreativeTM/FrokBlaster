@@ -36,12 +36,15 @@ protected:
 
 	// 서버에서 쓰는 함수는 UFUNCTION을 통해서 알려줘야 한다.
 	// 문제는 Server는 단순히 Server에서만 처리하는 것!
+	// FVector_NetQuantize는 네트워킹을 위해서 사용되는 직렬화된 자료형이다.
+	// 0 decimal place of precision. Up to 20 bits per component. 
+	// Valid range: 2^20 = +/- 1,048,576
 	UFUNCTION(Server, Reliable)
-	void ServerFire();
+	void ServerFire(const FVector_NetQuantize& TraceHitTarget);
 
 	// NetMulticast : 멀티캐스트할 함수
 	UFUNCTION(NetMulticast, Reliable)
-	void MulticastFire();
+	void MulticastFire(const FVector_NetQuantize& TraceHitTarget);
 
 	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
 
@@ -61,8 +64,6 @@ private :
 	float AimWalkSpeed;
 
 	bool bFireButtonPressed;
-
-	FVector HitTarget;	// 맞은 위치를 저장한다.
 
 public : 
 	// ABlasterCharacter 입장에서는 이 컴포넌트의 모든 것에 접근할 수 있어야 한다.

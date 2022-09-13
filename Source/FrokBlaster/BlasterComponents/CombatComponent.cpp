@@ -97,16 +97,6 @@ void UCombatComponent::OnRep_EquippedWeapon()
 	}
 }
 
-void UCombatComponent::FireButtonPressed(bool bPressed)
-{
-	bFireButtonPressed = bPressed;
-
-	// 서버에서 처리하도록! 하지만 이러면 서버에서만 작동한다.
-	// 클라이언트한테 Notify가 필요하다. (즉 Multicast가 필요하다.)
-	if(bFireButtonPressed)
-		ServerFire();
-}
-
 void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 {
 	FVector2D ViewportSize;
@@ -143,41 +133,39 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 		FVector End = Start + CrosshairWorldDirection * TRACE_LENGTH;
 
 		// 현재 보이는 사물(액터)를 찾을 때까지 지속적으로 트레이싱한다.
+		// 트레이싱 결과는 TraceHitResult에 저장된다.
 		GetWorld()->LineTraceSingleByChannel(
 			TraceHitResult,
 			Start,
 			End,
 			ECollisionChannel::ECC_Visibility);
+	}
+}
 
-		// 무언가 맞지 않았다면
-		if (!TraceHitResult.bBlockingHit)
-		{
-			// 충돌 지점은 대충 End위치(엄청나게 먼 위치)에 잡아둔다.
-			TraceHitResult.ImpactPoint = End;
-			HitTarget = End;
-		}
-		else
-		{
-			HitTarget = TraceHitResult.ImpactPoint;
-			// 맞은 위치에 구를 그린다.
-			DrawDebugSphere(
-				GetWorld(),
-				TraceHitResult.ImpactPoint,
-				12.f,
-				12,
-				FColor::Red);
-		}
+void UCombatComponent::FireButtonPressed(bool bPressed)
+{
+	bFireButtonPressed = bPressed;
+
+	// 서버에서 처리하도록! 하지만 이러면 서버에서만 작동한다.
+	// 클라이언트한테 Notify가 필요하다. (즉 Multicast가 필요하다.)
+	if (bFireButtonPressed)
+	{
+		// HitResult는 TraceUnderCrosshairs 함수에서 결과값을 저장한 뒤 
+		// 최종 도달 위치를 ServerFire에서 그리고 MulticastFire로 전달된다.
+		FHitResult HitResult;
+		TraceUnderCrosshairs(HitResult);
+		ServerFire(HitResult.ImpactPoint);
 	}
 }
 
 // RPC 함수는 _Implementation가 붙는다!!!!
-void UCombatComponent::ServerFire_Implementation()
+void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
 {
 	// 서버에서는 Fire한 행동을 multicast한다.
-	MulticastFire();
+	MulticastFire(TraceHitTarget);
 }
 
-void UCombatComponent::MulticastFire_Implementation()
+void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
 {
 	// Fire의 역할을 어느 정도 서버가 나눠서 처리한다.
 	// 즉 Fire의 메인 로직은 Server가 처리해주는 식인 것이다.
@@ -187,7 +175,7 @@ void UCombatComponent::MulticastFire_Implementation()
 	if (Character)
 	{
 		Character->PlayFireMontage(bAiming);	// 캐릭터가 발사하는 모션을 취하게 한다.
-		EquippedWeapon->Fire(HitTarget);		// 동시에 장착중인 무기의 발사 애니메이션을 재생시킨다.
+		EquippedWeapon->Fire(TraceHitTarget);	// 동시에 장착중인 무기의 발사 애니메이션을 재생시킨다.
 												// 이 때 저장된 맞은 위치를 같이 전송한다.
 	}
 }
