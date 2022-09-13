@@ -1,5 +1,6 @@
 #include "Projectile.h"
 #include "Components/BoxComponent.h"
+#include "GameFramework/ProjectileMovementComponent.h"
 
 AProjectile::AProjectile()
 {
@@ -19,6 +20,13 @@ AProjectile::AProjectile()
 		ECollisionResponse::ECR_Block);
 	CollisionBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic,
 		ECollisionResponse::ECR_Block);
+
+	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
+	// 투사체의 회전이 이동 방향에 맞춰 매 프레임 업데이트
+	ProjectileMovementComponent->bRotationFollowsVelocity = true;
+	// 투사체의 초기 스피드와 최고 스피드는 15000이다.
+	ProjectileMovementComponent->InitialSpeed = 15000.f;
+	ProjectileMovementComponent->MaxSpeed = 15000.f;
 }
 
 void AProjectile::BeginPlay()
