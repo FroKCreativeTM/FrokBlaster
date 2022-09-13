@@ -5,6 +5,8 @@
 #include "Net/UnrealNetwork.h"
 #include "Animation/AnimationAsset.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "FrokBlaster/Weapon/Casing.h"
+#include "Engine/SkeletalMeshSocket.h"
 
 AWeapon::AWeapon()
 {
@@ -108,6 +110,31 @@ void AWeapon::Fire(const FVector& HitTarget)
 	{
 		// 루프하지 않는 발사 애니메이션을 재생한다.
 		WeaponMesh->PlayAnimation(FireAnimation, false);
+	}
+
+	if (CasingClass)
+	{
+		// 총알이 나가는 곳의 소켓을 가져온다.
+		const USkeletalMeshSocket* AmmoEjectSocket
+			= WeaponMesh->GetSocketByName(FName("AmmoEject"));
+
+		// 총알이 나가는 곳가 존재한다.
+		if (AmmoEjectSocket)
+		{
+			// 총알이 나가는 곳의 트랜스폼 정보를 가져온다.
+			FTransform SocketTransform
+				= AmmoEjectSocket->GetSocketTransform(WeaponMesh);
+
+			// 총알을 스폰시킨다.
+			UWorld* World = GetWorld();
+			if (World)
+			{
+				World->SpawnActor<ACasing>(
+					CasingClass,
+					SocketTransform.GetLocation(),
+					SocketTransform.GetRotation().Rotator());
+			}
+		}
 	}
 }
 
