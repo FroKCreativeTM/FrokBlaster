@@ -29,7 +29,7 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
 	void ShowPickupWidget(bool bShowWidget);
-	void Fire();
+	virtual void Fire(const FVector& HitTarget);
 
 public : 
 	// Getter/Setter

@@ -154,9 +154,11 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 		{
 			// 충돌 지점은 대충 End위치(엄청나게 먼 위치)에 잡아둔다.
 			TraceHitResult.ImpactPoint = End;
+			HitTarget = End;
 		}
 		else
 		{
+			HitTarget = TraceHitResult.ImpactPoint;
 			// 맞은 위치에 구를 그린다.
 			DrawDebugSphere(
 				GetWorld(),
@@ -185,7 +187,8 @@ void UCombatComponent::MulticastFire_Implementation()
 	if (Character)
 	{
 		Character->PlayFireMontage(bAiming);	// 캐릭터가 발사하는 모션을 취하게 한다.
-		EquippedWeapon->Fire();					// 동시에 장착중인 무기의 발사 애니메이션을 재생시킨다.
+		EquippedWeapon->Fire(HitTarget);		// 동시에 장착중인 무기의 발사 애니메이션을 재생시킨다.
+												// 이 때 저장된 맞은 위치를 같이 전송한다.
 	}
 }
  
