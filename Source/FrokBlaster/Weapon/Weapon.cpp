@@ -3,6 +3,8 @@
 #include "Components/SphereComponent.h"
 #include "FrokBlaster/Character/BlasterCharacter.h"
 #include "Net/UnrealNetwork.h"
+#include "Animation/AnimationAsset.h"
+#include "Components/SkeletalMeshComponent.h"
 
 AWeapon::AWeapon()
 {
@@ -97,6 +99,15 @@ void AWeapon::ShowPickupWidget(bool bShowWidget)
 	if (PickupWidget)
 	{
 		PickupWidget->SetVisibility(bShowWidget);
+	}
+}
+
+void AWeapon::Fire()
+{
+	if (FireAnimation)
+	{
+		// 루프하지 않는 발사 애니메이션을 재생한다.
+		WeaponMesh->PlayAnimation(FireAnimation, false);
 	}
 }
 

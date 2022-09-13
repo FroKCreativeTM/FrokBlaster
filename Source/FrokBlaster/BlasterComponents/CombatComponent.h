@@ -34,6 +34,17 @@ protected:
 
 	void FireButtonPressed(bool bPressed);
 
+	// 서버에서 쓰는 함수는 UFUNCTION을 통해서 알려줘야 한다.
+	// 문제는 Server는 단순히 Server에서만 처리하는 것!
+	UFUNCTION(Server, Reliable)
+	void ServerFire();
+
+	// NetMulticast : 멀티캐스트할 함수
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastFire();
+
+	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
+
 private :
 	class ABlasterCharacter* Character;	// 장착중인 캐릭터
 
