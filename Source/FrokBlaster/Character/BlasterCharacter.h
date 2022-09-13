@@ -19,6 +19,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PostInitializeComponents() override;
+	void PlayFireMontage(bool bAiming);
 
 protected:
 	virtual void BeginPlay() override;
@@ -30,10 +31,15 @@ protected:
 
 	void EquipButtonPressed();
 	void CrouchButtonPressed();	
+
 	void AimButtonPressed();
 	void AimButtonReleased();
 	void AimOffset(float DeltaTime);
+
 	virtual void Jump() override;
+
+	void FireButtonPressed();
+	void FireButtonReleased();
 
 private :
 	UPROPERTY(VisibleAnywhere, Category=Camera)
@@ -69,6 +75,9 @@ private :
 	// 어느 방향으로 도는 지 저장하기 위한 변수
 	ETurningInPlace TurningInPlace;
 	void TurnInPlace(float DeltaTime);
+
+	UPROPERTY(EditAnywhere, Category = Combat)
+	class UAnimMontage* FireWeaponMontage;
 
 public:
 	// Getter/Setter

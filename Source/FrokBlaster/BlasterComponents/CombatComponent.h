@@ -23,6 +23,17 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	// Getter / Setter
+	void SetAiming(bool bIsAiming);
+
+	UFUNCTION(Server, Reliable)
+	void ServerSetAiming(bool bIsAiming);
+
+	UFUNCTION()
+	void OnRep_EquippedWeapon();
+
+	void FireButtonPressed(bool bPressed);
+
 private :
 	class ABlasterCharacter* Character;	// 장착중인 캐릭터
 
@@ -33,21 +44,14 @@ private :
 	bool bAiming;
 
 	UPROPERTY(EditAnywhere)
-		float BaseWalkSpeed;
+	float BaseWalkSpeed;
 
 	UPROPERTY(EditAnywhere)
-		float AimWalkSpeed;
+	float AimWalkSpeed;
+
+	bool bFireButtonPressed;
 
 public : 
 	// ABlasterCharacter 입장에서는 이 컴포넌트의 모든 것에 접근할 수 있어야 한다.
 	friend class ABlasterCharacter;
-
-	// Getter / Setter
-	void SetAiming(bool bIsAiming);
-
-	UFUNCTION(Server, Reliable)
-	void ServerSetAiming(bool bIsAiming);
-
-	UFUNCTION()
-	void OnRep_EquippedWeapon();
 };
