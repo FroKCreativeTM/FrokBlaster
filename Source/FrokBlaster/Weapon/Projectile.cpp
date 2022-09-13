@@ -4,6 +4,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystem.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "Sound/SoundCue.h"
 
 AProjectile::AProjectile()
 {
@@ -39,7 +40,6 @@ void AProjectile::BeginPlay()
 
 	if (Tracer)
 	{
-		// 
 		TracerComponent = UGameplayStatics::SpawnEmitterAttached(
 			Tracer,
 			CollisionBox,
@@ -47,12 +47,49 @@ void AProjectile::BeginPlay()
 			GetActorLocation(),
 			GetActorRotation(),
 			EAttachLocation::KeepWorldPosition);
-	}	
+	}
+
+	// 서버의 경우
+	if (HasAuthority())
+	{
+		CollisionBox->OnComponentHit.AddDynamic(this, &AProjectile::OnHit);
+	}
+}
+
+void AProjectile::OnHit(UPrimitiveComponent* HitComp, 
+	AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, 
+	FVector NormalImpulse, 
+	const FHitResult& Hit)
+{
+	// 사용한 투사체를 삭제한다. (아래 Destroyed를 실행한다.)
+	Destroy();
 }
 
 void AProjectile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+void AProjectile::Destroyed()
+{
+	Super::Destroyed();
+
+	if (ImpactParticles)
+	{
+		// 맞은 곳에 파티클 효과를 실행한다.
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(),
+			ImpactParticles,
+			GetActorTransform());
+	}
+
+	if (ImpactSound)
+	{
+		// 맞은 곳에서 사운드를 재생한다.
+		UGameplayStatics::PlaySoundAtLocation(this,
+			ImpactSound,
+			GetActorLocation());
+	}
 }
 
