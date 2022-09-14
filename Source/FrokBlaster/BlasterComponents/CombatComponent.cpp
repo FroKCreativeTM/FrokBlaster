@@ -8,7 +8,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
 #include "FrokBlaster/PlayerController/BlasterPlayerController.h"
-#include "FrokBlaster/HUD/BlasterHUD.h"
 #include "Camera/CameraComponent.h"
 
 const float TRACE_LENGTH = 80000.f;
@@ -156,6 +155,15 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 			Start,
 			End,
 			ECollisionChannel::ECC_Visibility);
+		if (TraceHitResult.GetActor() 
+			&& TraceHitResult.GetActor()->Implements<UInteractWithCrosshairsInterface>())
+		{
+			HUDPackage.CrosshairsColor = FLinearColor::Red;
+		}
+		else
+		{
+			HUDPackage.CrosshairsColor = FLinearColor::White;
+		}
 	}
 }
 
@@ -174,7 +182,6 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 		// 드디어 접근한다...
 		if (HUD)
 		{
-			FHUDPackage HUDPackage;
 			if (EquippedWeapon)
 			{
 				HUDPackage.CrosshairsCenter = EquippedWeapon->CrosshairsCenter;

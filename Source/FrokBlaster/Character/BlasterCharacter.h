@@ -5,10 +5,11 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "FrokBlaster/BlasterTypes/TurningInPlace.h"
+#include "FrokBlaster/Interfaces/InteractWithCrosshairsInterface.h"
 #include "BlasterCharacter.generated.h"
 
 UCLASS()
-class FROKBLASTER_API ABlasterCharacter : public ACharacter
+class FROKBLASTER_API ABlasterCharacter : public ACharacter, public IInteractWithCrosshairsInterface
 {
 	GENERATED_BODY()
 

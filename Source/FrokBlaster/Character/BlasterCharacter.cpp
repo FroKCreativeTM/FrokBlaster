@@ -40,6 +40,7 @@ ABlasterCharacter::ABlasterCharacter()
 	// 메시, 캡슐이 카메라와 부딛히는 경우 무시하게 만들어준다.
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
 
 	// 회전 비율을 설정한다.
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 0.f, 850.f);
