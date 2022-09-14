@@ -75,6 +75,8 @@ private :
 	 */
 	float CrosshairVelocityFactor;	// 정규화된 걷기 속도
 	float CrosshairInAirFactor;	// 정규화된 걷기 속도
+	float CrosshairAimFactor;
+	float CrosshairShootingFactor;
 
 	FVector HitTarget;
 
