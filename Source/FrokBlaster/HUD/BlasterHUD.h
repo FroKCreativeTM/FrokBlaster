@@ -31,10 +31,12 @@ class FROKBLASTER_API ABlasterHUD : public AHUD
 public : 
 	// HUD에 무엇을 그릴 것인가.
 	void DrawHUD() override;
-
+	
 public : 
 	FORCEINLINE void SetHUDPackage(const FHUDPackage& Package) { HUDPackage = Package; }
 
 private : 
 	FHUDPackage HUDPackage;
+
+	void DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter);
 };
