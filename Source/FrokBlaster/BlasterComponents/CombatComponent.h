@@ -78,6 +78,21 @@ private :
 
 	FVector HitTarget;
 
+	/**
+	* 조준과 FOV
+	*/
+	float DefaultFOV;
+
+	UPROPERTY(EditAnywhere, Category = Combat)
+	float ZoomedFOV = 30.f;
+
+	float CurrentFOV;
+
+	UPROPERTY(EditAnywhere, Category = Combat)
+	float ZoomInterpSpeed = 20.f;
+
+	void InterpFOV(float DeltaTime);
+
 public : 
 	// ABlasterCharacter 입장에서는 이 컴포넌트의 모든 것에 접근할 수 있어야 한다.
 	friend class ABlasterCharacter;
