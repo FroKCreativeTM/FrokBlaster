@@ -35,6 +35,8 @@ protected:
 
 	void FireButtonPressed(bool bPressed);
 
+	void Fire();
+
 	// 서버에서 쓰는 함수는 UFUNCTION을 통해서 알려줘야 한다.
 	// 문제는 Server는 단순히 Server에서만 처리하는 것!
 	// FVector_NetQuantize는 네트워킹을 위해서 사용되는 직렬화된 자료형이다.
@@ -96,6 +98,16 @@ private :
 	float ZoomInterpSpeed = 20.f;
 
 	void InterpFOV(float DeltaTime);
+
+	/**
+	* 연사
+	*/
+
+	FTimerHandle FireTimer;
+	bool bCanFire = true;
+
+	void StartFireTimer();
+	void FireTimerFinished();
 
 public : 
 	// ABlasterCharacter 입장에서는 이 컴포넌트의 모든 것에 접근할 수 있어야 한다.

@@ -9,6 +9,7 @@
 #include "DrawDebugHelpers.h"
 #include "FrokBlaster/PlayerController/BlasterPlayerController.h"
 #include "Camera/CameraComponent.h"
+#include "TimerManager.h"
 
 const float TRACE_LENGTH = 80000.f;
 
@@ -287,24 +288,60 @@ void UCombatComponent::InterpFOV(float DeltaTime)
 
 }
 
+void UCombatComponent::StartFireTimer()
+{
+	if (EquippedWeapon == nullptr || Character == nullptr) return;
+
+
+	Character->GetWorldTimerManager().SetTimer(
+		FireTimer,
+		this,
+		&UCombatComponent::FireTimerFinished,
+		EquippedWeapon->FireDelay
+	);
+}
+
+void UCombatComponent::FireTimerFinished()
+{
+	if (EquippedWeapon == nullptr) return;
+	bCanFire = true;
+	if (bFireButtonPressed && EquippedWeapon->bAutomatic)
+	{
+		Fire();
+	}
+}
+
 void UCombatComponent::FireButtonPressed(bool bPressed)
 {
 	bFireButtonPressed = bPressed;
 
-	// 서버에서 처리하도록! 하지만 이러면 서버에서만 작동한다.
-	// 클라이언트한테 Notify가 필요하다. (즉 Multicast가 필요하다.)
 	if (bFireButtonPressed)
 	{
+		Fire();
+	}
+}
+
+void UCombatComponent::Fire()
+{
+	// 쏠 수 있는 장비가 없다면 당연히 발사를 할 수 없다.
+	if (EquippedWeapon == nullptr) return;
+
+	// 쏠 수 있는 상태라면
+	if (bCanFire)
+	{
+		bCanFire = false;
+
+		// 서버에서 처리하도록! 하지만 이러면 서버에서만 작동한다.
+		// 클라이언트한테 Notify가 필요하다. (즉 Multicast가 필요하다.)
+
 		// HitResult는 TraceUnderCrosshairs 함수에서 결과값을 저장한 뒤 
 		// 최종 도달 위치를 ServerFire에서 그리고 MulticastFire로 전달된다.
-		FHitResult HitResult;
-		TraceUnderCrosshairs(HitResult);
-		ServerFire(HitResult.ImpactPoint);
-
+		ServerFire(HitTarget);
 		if (EquippedWeapon)
 		{
 			CrosshairShootingFactor = .75f;
 		}
+		StartFireTimer();
 	}
 }
 
