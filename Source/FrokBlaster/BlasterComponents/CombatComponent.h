@@ -48,8 +48,13 @@ protected:
 
 	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
 
+	// HUD의 조준선을 설정한다.
+	void SetHUDCrosshairs(float DeltaTime);
+
 private :
-	class ABlasterCharacter* Character;	// 장착중인 캐릭터
+	class ABlasterCharacter*		Character;	// 장착중인 캐릭터
+	class ABlasterPlayerController* Controller;	// 조종중인 플레이어 컨트롤러
+	class ABlasterHUD*				HUD;		// 조종중인 플레이어 컨트롤러
 
 	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
 	AWeapon* EquippedWeapon;		// 장착중인 무기
