@@ -70,6 +70,12 @@ private :
 
 	bool bFireButtonPressed;
 
+	/*
+	 * 조준선과 HUD
+	 */
+	float CrosshairVelocityFactor;	// 정규화된 걷기 속도
+	float CrosshairInAirFactor;	// 정규화된 걷기 속도
+
 public : 
 	// ABlasterCharacter 입장에서는 이 컴포넌트의 모든 것에 접근할 수 있어야 한다.
 	friend class ABlasterCharacter;

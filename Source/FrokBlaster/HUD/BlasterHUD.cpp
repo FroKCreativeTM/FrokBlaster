@@ -15,29 +15,46 @@ void ABlasterHUD::DrawHUD()
 		GEngine->GameViewport->GetViewportSize(ViewportSize);
 		const FVector2D ViewportCenter(ViewportSize.X / 2, ViewportSize.Y / 2);
 
-		if (HUDPackage.CrosshairsCenter)
-			DrawCrosshair(HUDPackage.CrosshairsCenter, ViewportCenter);
+		float SpreadScaled = CrosshairSpreadMax * HUDPackage.CrosshairSpread;
+
+		if (HUDPackage.CrosshairsCenter) 
+		{
+			FVector2D Spread(0.f, 0.f);
+			DrawCrosshair(HUDPackage.CrosshairsCenter, ViewportCenter, Spread);
+		}
 		if (HUDPackage.CrosshairsLeft)
-			DrawCrosshair(HUDPackage.CrosshairsLeft, ViewportCenter);
+		{
+			FVector2D Spread(-SpreadScaled, 0.f);
+			DrawCrosshair(HUDPackage.CrosshairsLeft, ViewportCenter, Spread);
+		}
 		if (HUDPackage.CrosshairsRight)
-			DrawCrosshair(HUDPackage.CrosshairsRight, ViewportCenter);
+		{
+			FVector2D Spread(SpreadScaled, 0.f);
+			DrawCrosshair(HUDPackage.CrosshairsRight, ViewportCenter, Spread);
+		}
 		if (HUDPackage.CrosshairsTop)
-			DrawCrosshair(HUDPackage.CrosshairsTop, ViewportCenter);
+		{
+			FVector2D Spread(0.f, -SpreadScaled);
+			DrawCrosshair(HUDPackage.CrosshairsTop, ViewportCenter, Spread);
+		}
 		if (HUDPackage.CrosshairsBottom)
-			DrawCrosshair(HUDPackage.CrosshairsBottom, ViewportCenter);
+		{
+			FVector2D Spread(0.f, SpreadScaled);
+			DrawCrosshair(HUDPackage.CrosshairsBottom, ViewportCenter, Spread);
+		}
 	}
 }
 
-void ABlasterHUD::DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter)
+void ABlasterHUD::DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread)
 {
 	// 먼저 텍스처의 X와 Y사이즈를 구한다.
 	const float TextureWidth = Texture->GetSizeX();
 	const float TextureHeight = Texture->GetSizeY();
 	
-	// 텍스처 위치를 중앙에서 텍스처 사이즈에 맞춰 보정한다
+	// 텍스처 위치를 중앙에서 텍스처 사이즈에 맞춰 보정한다.
 	const FVector2D TextureDrawPoint(
-		ViewportCenter.X - (TextureWidth / 2.f),
-		ViewportCenter.Y - (TextureHeight / 2.f)
+		ViewportCenter.X - (TextureWidth / 2.f) + Spread.X,
+		ViewportCenter.Y - (TextureHeight / 2.f) + Spread.Y
 	);
 
 	// 그린다!

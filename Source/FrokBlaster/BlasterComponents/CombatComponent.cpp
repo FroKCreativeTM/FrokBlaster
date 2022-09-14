@@ -174,6 +174,47 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 				HUDPackage.CrosshairsTop = nullptr;
 				HUDPackage.CrosshairsBottom = nullptr;
 			}
+			// 조준선 흩어짐을 계산한다.
+			// 웅크린 경우와 아닌 경우의 스피드가 다르니 이를 따로 집계한다.
+			if (Character->bIsCrouched) 
+			{
+				// [0, MaxWalkSpeedCrouched] -> [0, 0.75]로 정규화한다.
+				FVector2D WalkSpeedRange(0.f, Character->GetCharacterMovement()->MaxWalkSpeedCrouched);
+				FVector2D VelocityMultiplierRange(0.f, 0.75f);
+				FVector Velocity = Character->GetVelocity();
+				Velocity.Z = 0.f;	// Z는 신경쓸 필요가 없다
+
+				// 현재 걷는 속도에 따른 정규화 진행를 진행한 뒤 저장한다.
+				CrosshairVelocityFactor = FMath::GetMappedRangeValueClamped(WalkSpeedRange,
+					VelocityMultiplierRange, Velocity.Size());
+			}
+			else
+			{
+				// [0, MaxWalkSpeed] -> [0, 1]로 정규화한다.
+				FVector2D WalkSpeedRange(0.f, Character->GetCharacterMovement()->MaxWalkSpeed);
+				FVector2D VelocityMultiplierRange(0.f, 1.f);
+				FVector Velocity = Character->GetVelocity();
+				Velocity.Z = 0.f;	// Z는 신경쓸 필요가 없다
+
+				// 현재 걷는 속도에 따른 정규화 진행를 진행한 뒤 저장한다.
+				CrosshairVelocityFactor = FMath::GetMappedRangeValueClamped(WalkSpeedRange,
+					VelocityMultiplierRange, Velocity.Size());
+			}
+
+			if (Character->GetCharacterMovement()->IsFalling())
+			{
+				// 만약 떨어지는 중이라면
+				CrosshairInAirFactor = FMath::FInterpTo(CrosshairInAirFactor, 
+					2.25f, DeltaTime, 2.25f);
+			}
+			else
+			{
+				CrosshairInAirFactor = FMath::FInterpTo(CrosshairInAirFactor,
+					0.f, DeltaTime, 2.25);
+			}
+
+			HUDPackage.CrosshairSpread = CrosshairVelocityFactor + CrosshairInAirFactor;
+
 			HUD->SetHUDPackage(HUDPackage);
 		}
 	}
