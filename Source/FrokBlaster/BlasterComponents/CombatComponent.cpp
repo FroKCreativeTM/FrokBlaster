@@ -146,6 +146,13 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 		// 이 때 End 위치는 Start 위치에서 진행방향으로부터 충분히 먼 곳까지 트레이싱을 진행하게
 		// 대강 100000으로 잡아주었다.
 		FVector Start = CrosshairWorldPosition;
+
+		if (Character)
+		{
+			float DistanceToCharacter = (Character->GetActorLocation() - Start).Size();
+			Start += CrosshairWorldDirection * (DistanceToCharacter + 100.f);
+		}
+
 		FVector End = Start + CrosshairWorldDirection * TRACE_LENGTH;
 
 		// 현재 보이는 사물(액터)를 찾을 때까지 지속적으로 트레이싱한다.
