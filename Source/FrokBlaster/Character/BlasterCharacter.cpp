@@ -362,3 +362,9 @@ AWeapon* ABlasterCharacter::GetEquippedWeapon()
 	// 현재 캐릭터가 가지고 있는 전투 시스템에 등록된 무기를 반환한다.
 	return Combat->EquippedWeapon;
 }
+
+FVector ABlasterCharacter::GetHitTarget() const
+{
+	if (Combat == nullptr) return FVector();
+	return Combat->HitTarget;
+}

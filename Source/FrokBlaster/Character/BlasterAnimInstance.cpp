@@ -27,11 +27,10 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float fDeltaTime)
 	Speed = Velocity.Size();
 
 	bIsInAir = BlasterCharacter->GetCharacterMovement()->IsFalling();
-	bIsAccelerating
-		= (BlasterCharacter->GetCharacterMovement()->GetCurrentAcceleration().Size() > 0.f ? true : false);
-
+	bIsAccelerating = BlasterCharacter->GetCharacterMovement()->GetCurrentAcceleration().Size() > 0.f ? true : false;
 	bWeaponEquipped = BlasterCharacter->IsWeaponEquipped();
-	bIsCrouched = BlasterCharacter->bIsCrouched;	
+	EquippedWeapon = BlasterCharacter->GetEquippedWeapon();
+	bIsCrouched = BlasterCharacter->bIsCrouched;
 	bAiming = BlasterCharacter->IsAiming();
 	TurningInPlace = BlasterCharacter->GetTurningInPlace();
 
@@ -58,10 +57,7 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float fDeltaTime)
 	// 그 무기의 실체가 있으며
 	// 그 무기의 mesh도 있고
 	// 이 애니메이션 인스턴스를 가진 캐릭터의 메시도 존재한다면
-	if (bWeaponEquipped 
-		&& EquippedWeapon 
-		&& EquippedWeapon->GetWeaponMesh() 
-		&& BlasterCharacter->GetMesh())
+	if (bWeaponEquipped && EquippedWeapon && EquippedWeapon->GetWeaponMesh() && BlasterCharacter->GetMesh())
 	{
 		// 왼손 소켓의 트랜스폼 정보를 가져온다.
 		LeftHandTransform 
@@ -72,11 +68,17 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float fDeltaTime)
 		FRotator OutRotation;
 
 		// hand_r 소캣의 본의 위치와 회전값을 가져온다.
-		BlasterCharacter->GetMesh()->TransformToBoneSpace(FName("hand_r"), 
-			LeftHandTransform.GetLocation(), FRotator::ZeroRotator, OutPosition, OutRotation);
+		BlasterCharacter->GetMesh()->TransformToBoneSpace(FName("hand_r"), LeftHandTransform.GetLocation(), FRotator::ZeroRotator, OutPosition, OutRotation);
 
 		// 가져온 본 값을 왼손에 적용한다.
 		LeftHandTransform.SetLocation(OutPosition);
 		LeftHandTransform.SetRotation(FQuat(OutRotation));
+
+		if (BlasterCharacter->IsLocallyControlled())
+		{
+			bLocallyControlled = true;
+			FTransform RightHandTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("hand_r"), ERelativeTransformSpace::RTS_World);
+			RightHandRotation = UKismetMathLibrary::FindLookAtRotation(RightHandTransform.GetLocation(), RightHandTransform.GetLocation() + (RightHandTransform.GetLocation() - BlasterCharacter->GetHitTarget()));
+		}
 	}
 }
