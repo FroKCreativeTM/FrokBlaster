@@ -33,6 +33,7 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float fDeltaTime)
 	bIsCrouched = BlasterCharacter->bIsCrouched;
 	bAiming = BlasterCharacter->IsAiming();
 	TurningInPlace = BlasterCharacter->GetTurningInPlace();
+	bRotateRootBone = BlasterCharacter->ShouldRotateRootBone();
 
 	/* 복습할 코드 */
 	// 스트레이핑을 위한 yaw 오프셋 

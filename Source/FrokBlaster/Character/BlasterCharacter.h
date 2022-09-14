@@ -27,6 +27,8 @@ public:
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastHit();
 
+	virtual void OnRep_ReplicatedMovement() override;
+
 protected:
 	virtual void BeginPlay() override;
 	
@@ -41,6 +43,10 @@ protected:
 	void AimButtonPressed();
 	void AimButtonReleased();
 	void AimOffset(float DeltaTime);
+
+	void CalculateAO_Pitch();
+	// 클라이언트에서 시뮬되고 있는 프록시들의 turning을 좀 더 매끄럽게 하기 위한 함수
+	void SimProxiesTurn();	
 
 	virtual void Jump() override;
 
@@ -96,6 +102,14 @@ private :
 	UPROPERTY(EditAnywhere)
 	float CameraThreshold = 200.f;
 
+	bool bRotateRootBone;
+	float TurnThreshold = 0.5f;
+	FRotator ProxyRotationLastFrame;
+	FRotator ProxyRotation;
+	float ProxyYaw;
+	float TimeSinceLastMovementReplication;
+	float CalculateSpeed();
+
 public:
 	// Getter/Setter
 	void SetOverlappingWeapon(AWeapon* Weapon);
@@ -107,4 +121,6 @@ public:
 	FORCEINLINE ETurningInPlace GetTurningInPlace() const { return TurningInPlace; }
 	FVector GetHitTarget() const;
 	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+	// 적 인스턴스 또한 우리가회전하고 있는가를 알게한다.
+	FORCEINLINE bool ShouldRotateRootBone() const { return bRotateRootBone; }
 };
