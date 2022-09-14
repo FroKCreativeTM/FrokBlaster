@@ -9,6 +9,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "BlasterAnimInstance.h"
+#include "FrokBlaster/FrokBlaster.h"
 
 ABlasterCharacter::ABlasterCharacter()
 {
@@ -39,6 +40,7 @@ ABlasterCharacter::ABlasterCharacter()
 
 	// 메시, 캡슐이 카메라와 부딛히는 경우 무시하게 만들어준다.
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	GetMesh()->SetCollisionObjectType(ECC_SkeletalMesh);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
 
@@ -104,6 +106,23 @@ void ABlasterCharacter::PlayFireMontage(bool bAiming)
 	}
 }
 
+void ABlasterCharacter::PlayHitReactMontage()
+{
+	// 무기를 안 들고 있다면 당연히 실행X.
+	if (Combat == nullptr || Combat->EquippedWeapon == nullptr) return;
+
+	// 메시에서 애님인스턴스를 가져온다.
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && HitReactMontage)
+	{
+		// 몽타주를 가져온 뒤
+		// 맞는 섹션의 애니메이션을 실행한다.
+		AnimInstance->Montage_Play(HitReactMontage);
+		FName SectionName("FromFront");
+		AnimInstance->Montage_JumpToSection(SectionName);
+	}
+}
+
 void ABlasterCharacter::TurnInPlace(float DeltaTime)
 {
 	// 회전하고 있는 Yaw 방향이 어딘가에 따라서 도는 방향을 저장한다.
@@ -133,6 +152,11 @@ void ABlasterCharacter::TurnInPlace(float DeltaTime)
 			StartingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
 		}
 	}
+}
+
+void ABlasterCharacter::MulticastHit_Implementation()
+{
+	PlayHitReactMontage();
 }
 
 void ABlasterCharacter::HideCameraIfCharacterClose()

@@ -21,6 +21,11 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PostInitializeComponents() override;
 	void PlayFireMontage(bool bAiming);
+	void PlayHitReactMontage();
+
+	// 맞았을 경우를 서버는 멀티캐스팅한다(이거 없으면 Hit Reaction이 서버에서만 일어난다.)
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastHit();
 
 protected:
 	virtual void BeginPlay() override;
@@ -77,8 +82,14 @@ private :
 	ETurningInPlace TurningInPlace;
 	void TurnInPlace(float DeltaTime);
 
+	// 발사 모션 몽타주
 	UPROPERTY(EditAnywhere, Category = Combat)
 	class UAnimMontage* FireWeaponMontage;
+
+	// 맞았을 경우 몽타주
+	UPROPERTY(EditAnywhere, Category = Combat)
+	class UAnimMontage* HitReactMontage;
+
 
 	void HideCameraIfCharacterClose();
 

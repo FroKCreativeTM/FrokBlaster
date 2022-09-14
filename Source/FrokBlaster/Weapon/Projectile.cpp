@@ -5,6 +5,8 @@
 #include "Particles/ParticleSystem.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Sound/SoundCue.h"
+#include "FrokBlaster/Character/BlasterCharacter.h"
+#include "FrokBlaster/FrokBlaster.h"
 
 AProjectile::AProjectile()
 {
@@ -24,6 +26,10 @@ AProjectile::AProjectile()
 	CollisionBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility,
 		ECollisionResponse::ECR_Block);
 	CollisionBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic,
+		ECollisionResponse::ECR_Block);
+	CollisionBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn,
+		ECollisionResponse::ECR_Block);
+	CollisionBox->SetCollisionResponseToChannel(ECC_SkeletalMesh,
 		ECollisionResponse::ECR_Block);
 
 	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
@@ -56,20 +62,28 @@ void AProjectile::BeginPlay()
 	}
 }
 
+void AProjectile::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+}
+
 void AProjectile::OnHit(UPrimitiveComponent* HitComp, 
 	AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, 
 	FVector NormalImpulse, 
 	const FHitResult& Hit)
 {
+	ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(OtherActor);
+
+	// 이 총알에 맞은 플레이어가 있다면
+	if (BlasterCharacter)
+	{
+		BlasterCharacter->MulticastHit();
+	}
+
 	// 사용한 투사체를 삭제한다. (아래 Destroyed를 실행한다.)
 	Destroy();
-}
-
-void AProjectile::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
 }
 
 void AProjectile::Destroyed()
