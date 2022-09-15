@@ -3,6 +3,7 @@
 #include "FrokBlaster/HUD/CharacterOverlay.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
+#include "FrokBlaster/Character/BlasterCharacter.h"
 
 void ABlasterPlayerController::BeginPlay()
 {
@@ -10,6 +11,16 @@ void ABlasterPlayerController::BeginPlay()
 
 	// 플레이어 컨트롤러는 HUD에 접근할 수 있다.
 	BlasterHUD = Cast<ABlasterHUD>(GetHUD());
+}
+
+void ABlasterPlayerController::OnPossess(APawn* InPawn)
+{
+	Super::OnPossess(InPawn);
+	ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(InPawn);
+	if (BlasterCharacter)
+	{
+		SetHUDHealth(BlasterCharacter->GetHealth(), BlasterCharacter->GetMaxHealth());
+	}
 }
 
 void ABlasterPlayerController::SetHUDHealth(float Health, float MaxHealth)
