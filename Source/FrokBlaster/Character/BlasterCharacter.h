@@ -46,6 +46,8 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastElim();
 
+	virtual void Destroyed() override;
+
 protected:
 	virtual void BeginPlay() override;
 	
@@ -176,6 +178,19 @@ private :
 	// 동적 머터리얼 인스턴스와 사용한다.
 	UPROPERTY(EditAnywhere, Category = Elim)
 	UMaterialInstance* DissolveMaterialInstance;
+
+	/**
+	* 봇 죽는 기능(위에서 효과)
+	*/
+
+	UPROPERTY(EditAnywhere)
+	UParticleSystem* ElimBotEffect;
+
+	UPROPERTY(VisibleAnywhere)
+	UParticleSystemComponent* ElimBotComponent;
+
+	UPROPERTY(EditAnywhere)
+	class USoundCue* ElimBotSound;
 
 public:
 	// Getter/Setter
