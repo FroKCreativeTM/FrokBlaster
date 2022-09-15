@@ -31,6 +31,9 @@ public:
 	void ShowPickupWidget(bool bShowWidget);
 	virtual void Fire(const FVector& HitTarget);
 
+	// Á×´Â °æ¿ì ¹«±â¸¦ ¶³¾î¶ß¸²
+	void Dropped();
+
 public : 
 	// Getter/Setter
 	void SetWeaponState(EWeaponState State);
