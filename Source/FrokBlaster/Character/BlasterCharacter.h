@@ -23,9 +23,19 @@ public:
 	void PlayFireMontage(bool bAiming);
 	void PlayHitReactMontage();
 
-	// 맞았을 경우를 서버는 멀티캐스팅한다(이거 없으면 Hit Reaction이 서버에서만 일어난다.)
-	UFUNCTION(NetMulticast, Unreliable)
-	void MulticastHit();
+	// 데미지를 받았을 경우를 위한 함수
+	// ProjectileBullet의 OnHit 함수에 있는
+	// ApplyDamage와 연동되는 함수이다.
+	UFUNCTION()
+	void ReceiveDamage(AActor* DamagedActor, 
+		float Damage, const UDamageType* DamageType, 
+		class AController* InstigatorController, 
+		AActor* DamageCauser);
+	void UpdateHUDHealth();
+
+	//// 맞았을 경우를 서버는 멀티캐스팅한다(이거 없으면 Hit Reaction이 서버에서만 일어난다.)
+	//UFUNCTION(NetMulticast, Unreliable)
+	//void MulticastHit();
 
 	virtual void OnRep_ReplicatedMovement() override;
 

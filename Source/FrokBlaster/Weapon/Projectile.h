@@ -45,5 +45,7 @@ private :
 	class USoundCue* ImpactSound;
 
 public:	
-
+	// 이 총알이 주는 데미지값
+	UPROPERTY(EditAnywhere)
+	float Damage = 20.f;
 };

@@ -74,15 +74,9 @@ void AProjectile::OnHit(UPrimitiveComponent* HitComp,
 	FVector NormalImpulse, 
 	const FHitResult& Hit)
 {
-	ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(OtherActor);
+	// 각종 데미지등의 로직은 이 클래스를 상속받는
+	// 하위 투사체 클래스에서 구현한다.
 
-	// 이 총알에 맞은 플레이어가 있다면
-	if (BlasterCharacter)
-	{
-		BlasterCharacter->MulticastHit();
-	}
-
-	// 사용한 투사체를 삭제한다. (아래 Destroyed를 실행한다.)
 	Destroy();
 }
 

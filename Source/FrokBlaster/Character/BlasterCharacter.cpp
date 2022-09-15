@@ -68,10 +68,12 @@ void ABlasterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	BlasterPlayerController = Cast<ABlasterPlayerController>(Controller);
-	if (BlasterPlayerController)
+	// 먼저 HUD를 업데이트한다.
+	UpdateHUDHealth();
+	if (HasAuthority())
 	{
-		BlasterPlayerController->SetHUDHealth(Health, MaxHealth);
+		// 서버의 경우 ApplyDamage가 날아온 경우 ReceiveDamage를 실행한다.
+		OnTakeAnyDamage.AddDynamic(this, &ABlasterCharacter::ReceiveDamage);
 	}
 }
 
@@ -156,6 +158,36 @@ void ABlasterCharacter::PlayHitReactMontage()
 	}
 }
 
+void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, 
+	float Damage, const UDamageType* DamageType, 
+	AController* InstigatorController, 
+	AActor* DamageCauser)
+{
+	// 데미지를 받았을 경우 
+	// Clamp(0.f~MaxHealth 사이로)를 이용해서 간격 사이로 값을 조절한다.
+	Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
+
+	// 업데이트된 Health 값을 기반으로 체력 HUD를 업데이트 한다.
+	UpdateHUDHealth();
+
+	// 맞았을 경우 실행하는 애니메이션 몽타주를 실행한다.
+	PlayHitReactMontage();
+}
+
+void ABlasterCharacter::UpdateHUDHealth()
+{
+	// 플레이어 컨트롤러의 유무를 파악한다.
+	BlasterPlayerController 
+		= BlasterPlayerController == nullptr ? 
+		Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController;
+
+	if (BlasterPlayerController)
+	{
+		// 플레이어 컨트롤러를 통해서 Health값을 업데이트한다.
+		BlasterPlayerController->SetHUDHealth(Health, MaxHealth);
+	}
+}
+
 void ABlasterCharacter::TurnInPlace(float DeltaTime)
 {
 	// 회전하고 있는 Yaw 방향이 어딘가에 따라서 도는 방향을 저장한다.
@@ -187,10 +219,10 @@ void ABlasterCharacter::TurnInPlace(float DeltaTime)
 	}
 }
 
-void ABlasterCharacter::MulticastHit_Implementation()
-{
-	PlayHitReactMontage();
-}
+//void ABlasterCharacter::MulticastHit_Implementation()
+//{
+//	PlayHitReactMontage();
+//}
 
 void ABlasterCharacter::HideCameraIfCharacterClose()
 {
@@ -220,9 +252,11 @@ float ABlasterCharacter::CalculateSpeed()
 	return Velocity.Size();
 }
 
+// 체력 프로퍼티 값이 업데이트 되면 불려지는 함수
 void ABlasterCharacter::OnRep_Health()
 {
-
+	UpdateHUDHealth();
+	PlayHitReactMontage();
 }
 
 void ABlasterCharacter::SetOverlappingWeapon(AWeapon* Weapon)
