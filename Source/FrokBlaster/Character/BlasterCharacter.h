@@ -39,8 +39,11 @@ public:
 	virtual void OnRep_ReplicatedMovement() override;
 
 	// 죽었을 경우 멀티캐스팅으로 뿌려진다.
-	UFUNCTION(NetMulticast, Reliable)
 	void Elim();
+
+	// 
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastElim();
 
 protected:
 	virtual void BeginPlay() override;
@@ -140,6 +143,13 @@ private :
 	class ABlasterPlayerController* BlasterPlayerController;
 
 	bool bElimmed = false;
+
+	FTimerHandle ElimTimer;
+
+	UPROPERTY(EditDefaultsOnly)
+	float ElimDelay = 3.f;
+
+	void ElimTimerFinished();
 
 public:
 	// Getter/Setter
