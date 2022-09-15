@@ -120,6 +120,9 @@ private :
 	UFUNCTION()
 	void OnRep_Health();
 
+	// HUD 등을 관리할 현재 캐릭터의 컨트롤러 클래스
+	class ABlasterPlayerController* BlasterPlayerController;
+
 public:
 	// Getter/Setter
 	void SetOverlappingWeapon(AWeapon* Weapon);

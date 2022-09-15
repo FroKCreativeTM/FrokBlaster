@@ -11,6 +11,7 @@
 #include "BlasterAnimInstance.h"
 #include "FrokBlaster/FrokBlaster.h"
 #include "FrokBlaster/HUD/CharacterOverlay.h"
+#include "FrokBlaster/PlayerController/BlasterPlayerController.h"
 
 ABlasterCharacter::ABlasterCharacter()
 {
@@ -66,6 +67,12 @@ void ABlasterCharacter::OnRep_ReplicatedMovement()
 void ABlasterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	BlasterPlayerController = Cast<ABlasterPlayerController>(Controller);
+	if (BlasterPlayerController)
+	{
+		BlasterPlayerController->SetHUDHealth(Health, MaxHealth);
+	}
 }
 
 void ABlasterCharacter::Tick(float DeltaTime)
