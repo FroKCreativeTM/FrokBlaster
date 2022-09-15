@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "FrokBlaster/BlasterTypes/TurningInPlace.h"
 #include "FrokBlaster/Interfaces/InteractWithCrosshairsInterface.h"
+#include "Components/TimelineComponent.h"
 #include "BlasterCharacter.generated.h"
 
 UCLASS()
@@ -150,6 +151,31 @@ private :
 	float ElimDelay = 3.f;
 
 	void ElimTimerFinished();
+
+	/**
+	* 죽을 때 Dissolve effect
+	*/
+
+	UPROPERTY(VisibleAnywhere)
+	UTimelineComponent* DissolveTimeline;
+
+	FOnTimelineFloat DissolveTrack;
+
+	UPROPERTY(EditAnywhere)
+	UCurveFloat* DissolveCurve;
+
+	UFUNCTION()
+	void UpdateDissolveMaterial(float DissolveValue);
+	void StartDissolve();
+
+	// 런타임에 바뀌는 인스턴스
+	UPROPERTY(VisibleAnywhere, Category = Elim)
+	UMaterialInstanceDynamic* DynamicDissolveMaterialInstance;
+
+	// 블루프린트에서 사용하는 머터리얼 인스턴스
+	// 동적 머터리얼 인스턴스와 사용한다.
+	UPROPERTY(EditAnywhere, Category = Elim)
+	UMaterialInstance* DissolveMaterialInstance;
 
 public:
 	// Getter/Setter
