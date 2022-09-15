@@ -33,9 +33,18 @@ class FROKBLASTER_API ABlasterHUD : public AHUD
 public : 
 	// HUD에 무엇을 그릴 것인가.
 	void DrawHUD() override;
-	
+
+	UPROPERTY(EditAnywhere, Category = "Player Stats")
+	TSubclassOf<class UUserWidget> CharacterOverlayClass;
+
+	class UCharacterOverlay* CharacterOverlay;
+
 public : 
 	FORCEINLINE void SetHUDPackage(const FHUDPackage& Package) { HUDPackage = Package; }
+
+protected : 
+	virtual void BeginPlay() override;
+	void AddCharacterOverlay();
 
 private : 
 	FHUDPackage HUDPackage;

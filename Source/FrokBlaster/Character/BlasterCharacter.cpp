@@ -10,6 +10,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "BlasterAnimInstance.h"
 #include "FrokBlaster/FrokBlaster.h"
+#include "FrokBlaster/HUD/CharacterOverlay.h"
 
 ABlasterCharacter::ABlasterCharacter()
 {
@@ -100,6 +101,7 @@ void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	// COND_OwnerOnly : 만약 클라이언트 중 하나(autonomous proxy)와 Overlap된 경우
 	// overlapping된 무기는 단지 그 캐릭터를 소유한 클라이언트한테만 복제가 된다.
 	DOREPLIFETIME_CONDITION(ABlasterCharacter, OverlappingWeapon, COND_OwnerOnly);
+	DOREPLIFETIME(ABlasterCharacter, Health);
 }
 
 void ABlasterCharacter::PostInitializeComponents()
@@ -209,6 +211,11 @@ float ABlasterCharacter::CalculateSpeed()
 	FVector Velocity = GetVelocity();
 	Velocity.Z = 0.f;
 	return Velocity.Size();
+}
+
+void ABlasterCharacter::OnRep_Health()
+{
+
 }
 
 void ABlasterCharacter::SetOverlappingWeapon(AWeapon* Weapon)

@@ -1,7 +1,6 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "BlasterHUD.h"
+#include "GameFramework/PlayerController.h"
+#include "CharacterOverlay.h"
 
 void ABlasterHUD::DrawHUD()
 {
@@ -45,7 +44,27 @@ void ABlasterHUD::DrawHUD()
 	}
 }
 
-void ABlasterHUD::DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, 
+void ABlasterHUD::BeginPlay()
+{
+	Super::BeginPlay();
+
+	AddCharacterOverlay();
+}
+
+void ABlasterHUD::AddCharacterOverlay()
+{
+	// 먼저 현재 클라이언트에게 허용된 컨트롤러를 가져온다.
+	APlayerController * PlayerController = GetOwningPlayerController();	
+
+	if (PlayerController && CharacterOverlayClass)
+	{
+		// 컨트롤러를 이용해서 CharacterOverlay클래스 객체를 생성한다.
+		CharacterOverlay = CreateWidget<UCharacterOverlay>(PlayerController, CharacterOverlayClass);
+		CharacterOverlay->AddToViewport();
+	}
+}
+
+void ABlasterHUD::DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter,
 	FVector2D Spread, FLinearColor CrosshairColor)
 {
 	// 먼저 텍스처의 X와 Y사이즈를 구한다.

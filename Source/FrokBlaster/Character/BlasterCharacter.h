@@ -110,6 +110,16 @@ private :
 	float TimeSinceLastMovementReplication;
 	float CalculateSpeed();
 
+	// 플레이어 상태 관련 변수 및 함수
+	UPROPERTY(EditAnywhere, Category = "Player Stats")
+	float MaxHealth = 100.f;
+
+	UPROPERTY(ReplicatedUsing = OnRep_Health, VisibleAnywhere, Category = "Player Stats")
+	float Health = 100.f;
+
+	UFUNCTION()
+	void OnRep_Health();
+
 public:
 	// Getter/Setter
 	void SetOverlappingWeapon(AWeapon* Weapon);
