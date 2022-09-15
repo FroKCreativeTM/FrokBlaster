@@ -20,8 +20,11 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PostInitializeComponents() override;
+
+	// 몽타주 함수들
 	void PlayFireMontage(bool bAiming);
 	void PlayHitReactMontage();
+	void PlayElimMontage();
 
 	// 데미지를 받았을 경우를 위한 함수
 	// ProjectileBullet의 OnHit 함수에 있는
@@ -33,11 +36,11 @@ public:
 		AActor* DamageCauser);
 	void UpdateHUDHealth();
 
-	//// 맞았을 경우를 서버는 멀티캐스팅한다(이거 없으면 Hit Reaction이 서버에서만 일어난다.)
-	//UFUNCTION(NetMulticast, Unreliable)
-	//void MulticastHit();
-
 	virtual void OnRep_ReplicatedMovement() override;
+
+	// 죽었을 경우 멀티캐스팅으로 뿌려진다.
+	UFUNCTION(NetMulticast, Reliable)
+	void Elim();
 
 protected:
 	virtual void BeginPlay() override;
@@ -106,6 +109,9 @@ private :
 	UPROPERTY(EditAnywhere, Category = Combat)
 	class UAnimMontage* HitReactMontage;
 
+	// 죽었을 경우 몽타주
+	UPROPERTY(EditAnywhere, Category = Combat)
+	UAnimMontage* ElimMontage;
 
 	void HideCameraIfCharacterClose();
 
@@ -133,6 +139,8 @@ private :
 	// HUD 등을 관리할 현재 캐릭터의 컨트롤러 클래스
 	class ABlasterPlayerController* BlasterPlayerController;
 
+	bool bElimmed = false;
+
 public:
 	// Getter/Setter
 	void SetOverlappingWeapon(AWeapon* Weapon);
@@ -146,4 +154,6 @@ public:
 	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 	// 적 인스턴스 또한 우리가회전하고 있는가를 알게한다.
 	FORCEINLINE bool ShouldRotateRootBone() const { return bRotateRootBone; }
+	// 제거 여부 파악용
+	FORCEINLINE bool IsElimmed() const { return bElimmed; }
 };

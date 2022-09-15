@@ -12,6 +12,7 @@
 #include "FrokBlaster/FrokBlaster.h"
 #include "FrokBlaster/HUD/CharacterOverlay.h"
 #include "FrokBlaster/PlayerController/BlasterPlayerController.h"
+#include "FrokBlaster/GameMode/BlasterGameMode.h"
 
 ABlasterCharacter::ABlasterCharacter()
 {
@@ -62,6 +63,12 @@ void ABlasterCharacter::OnRep_ReplicatedMovement()
 	Super::OnRep_ReplicatedMovement();
 	SimProxiesTurn();
 	TimeSinceLastMovementReplication = 0.f;
+}
+
+void ABlasterCharacter::Elim_Implementation()
+{
+	bElimmed = true;
+	PlayElimMontage();
 }
 
 void ABlasterCharacter::BeginPlay()
@@ -158,6 +165,16 @@ void ABlasterCharacter::PlayHitReactMontage()
 	}
 }
 
+void ABlasterCharacter::PlayElimMontage()
+{
+	// 죽었을 경우 그에 맞는 몽타주를 실행한다.
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && ElimMontage)
+	{
+		AnimInstance->Montage_Play(ElimMontage);
+	}
+}
+
 void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, 
 	float Damage, const UDamageType* DamageType, 
 	AController* InstigatorController, 
@@ -172,6 +189,21 @@ void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor,
 
 	// 맞았을 경우 실행하는 애니메이션 몽타주를 실행한다.
 	PlayHitReactMontage();
+
+	// 만약 체력이 0이라면
+	if (Health == 0.f)
+	{
+		// 현재 게임 컨텍스트를 관리중인 게임 모드를 가져온다.
+		ABlasterGameMode* BlasterGameMode = GetWorld()->GetAuthGameMode<ABlasterGameMode>();
+		if (BlasterGameMode)
+		{
+			BlasterPlayerController = BlasterPlayerController == nullptr ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController;
+			ABlasterPlayerController* AttackerController = Cast<ABlasterPlayerController>(InstigatorController);
+
+			// 플레이어를 제거한다.
+			BlasterGameMode->PlayerEliminated(this, BlasterPlayerController, AttackerController);
+		}
+	}
 }
 
 void ABlasterCharacter::UpdateHUDHealth()
