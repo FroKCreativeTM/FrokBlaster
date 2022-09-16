@@ -39,6 +39,9 @@ public:
 
 	virtual void OnRep_ReplicatedMovement() override;
 
+	// 관련 클래스를 폴링하고 HUD를 초기화합니다.
+	void PollInit();
+
 	// 죽었을 경우 멀티캐스팅으로 뿌려진다.
 	void Elim();
 
@@ -192,6 +195,9 @@ private :
 	UPROPERTY(EditAnywhere)
 	class USoundCue* ElimBotSound;
 
+	// 게임 컨텍스트를 관리하기 위한 객체
+	class ABlasterPlayerState* BlasterPlayerState;
+
 public:
 	// Getter/Setter
 	void SetOverlappingWeapon(AWeapon* Weapon);
@@ -209,4 +215,5 @@ public:
 	FORCEINLINE bool IsElimmed() const { return bElimmed; }
 	FORCEINLINE float GetHealth() const { return Health; }
 	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
+	FORCEINLINE ABlasterPlayerController* GetBlasterCharacterController() const { return BlasterPlayerController; }
 };

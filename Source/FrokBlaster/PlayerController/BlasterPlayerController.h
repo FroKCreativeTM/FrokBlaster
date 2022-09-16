@@ -19,12 +19,13 @@ class FROKBLASTER_API ABlasterPlayerController : public APlayerController
 public : 
 	void SetHUDHealth(float Health, float MaxHealth);
 
+	void SetHUDScore(float Score);
+	void SetHUDDefeats(int32 Defeats);
+
 protected : 
 	virtual void BeginPlay() override;
 	virtual void OnPossess(APawn* InPawn) override;
 
 private : 
 	class ABlasterHUD* BlasterHUD;
-
-
 };

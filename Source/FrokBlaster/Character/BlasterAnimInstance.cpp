@@ -80,6 +80,10 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float fDeltaTime)
 		{
 			bLocallyControlled = true;
 			FTransform RightHandTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("hand_r"), ERelativeTransformSpace::RTS_World);
+
+			// 만약 라인 트레이싱 도중 히트된 타깃이 없다면 정방향을 보게 만든다.
+			if (BlasterCharacter->GetHitTarget() == FVector()) return;
+
 			FRotator LookAtRotation 
 				= UKismetMathLibrary::FindLookAtRotation(RightHandTransform.GetLocation(),	
 					RightHandTransform.GetLocation() + (RightHandTransform.GetLocation() - BlasterCharacter->GetHitTarget()));
